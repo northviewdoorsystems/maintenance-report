@@ -6,7 +6,7 @@
   and re-upload, so returning devices pick up the new version instead of
   serving a stale cached copy forever.
 */
-const CACHE_NAME = "nv-tuneup-v13";
+const CACHE_NAME = "nv-tuneup-v14";
 
 const SHELL_FILES = [
   "./",

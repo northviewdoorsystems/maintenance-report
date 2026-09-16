@@ -281,8 +281,8 @@ main{ max-width:720px; margin:0 auto; padding:16px 16px 96px; }
    fit the remaining space and got pushed to page 2 wholesale. */
 .pr-section{ margin-bottom:14px; }
 .pr-section h3{ font-size:13px; color:var(--navy); border-bottom:1px solid var(--line); padding-bottom:4px; margin-bottom:8px; page-break-after:avoid; }
-.pr-section h4{ font-size:10.5px; color:var(--ink-soft); font-weight:600; margin:8px 0 4px; }
-.pr-list{ font-size:12.5px; line-height:1.6; }
+.pr-section h4{ font-size:10.5px; color:var(--ink-soft); font-weight:600; margin:8px 0 4px; page-break-after:avoid; }
+.pr-list{ font-size:12.5px; line-height:1.6; page-break-inside:avoid; }
 .pr-list .item{
   display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
   border-bottom:1px dotted var(--line); padding:4px 0; page-break-inside:avoid;
@@ -324,14 +324,15 @@ main{ max-width:720px; margin:0 auto; padding:16px 16px 96px; }
    from the plain-white supporting detail below it. */
 .pr-highlight{
   background:#F8F6F1; border:1px solid var(--line); border-radius:4px;
-  padding:14px 16px 4px; margin-bottom:16px; page-break-inside:avoid;
+  padding:14px 16px 4px; margin-bottom:16px;
 }
 .pr-highlight-eyebrow{
   font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
-  color:var(--red); margin-bottom:10px;
+  color:var(--red); margin-bottom:10px; page-break-after:avoid;
 }
-.pr-highlight h4{ font-size:12px; color:var(--navy); margin:14px 0 8px; }
+.pr-highlight h4{ font-size:12px; color:var(--navy); margin:14px 0 8px; page-break-after:avoid; }
 .pr-highlight h4:first-of-type{ margin-top:0; }
+.pr-subgroup{ page-break-inside:avoid; }
 
 .pr-cta{ margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); page-break-inside:avoid; }
 .pr-cta-title{ font-size:12px; font-weight:700; color:var(--navy); margin-bottom:8px; }
@@ -603,19 +604,18 @@ const PRINT_LOGO_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAFZCA
 
 /* One-sentence, tier-aware framing shown near the top of the report
    — replaces a former bullet list that mostly repeated what's
-   already itemized in detail further down. [OWNER: adjust wording] */
+   already itemized in detail further down. Each entry must be fully
+   self-contained: a reader only ever sees the one tier that applies
+   to their visit, never both, so "everything in a Basic Tune-Up"
+   used to point at a description that wasn't anywhere in the
+   document. [OWNER: adjust wording] */
 const SERVICE_DESCRIPTION = {
   basic: "This report documents a Basic Tune-Up: a full visual inspection of the door and opener, lubrication of moving parts, and minor adjustments as needed.",
-  comprehensive: "This report documents a Comprehensive Safety & Performance Tune-Up: everything in a Basic Tune-Up, plus spring balance and safety testing, opener force and auto-reverse checks, and emergency release testing.",
+  comprehensive: "This report documents a Comprehensive Safety & Performance Tune-Up: a full visual inspection of the door and opener, lubrication of moving parts, minor adjustments as needed, spring balance and safety testing, opener force and auto-reverse checks, and emergency release testing.",
 };
 
 /* Call-to-action shown at the end of the Recommendations block —
-   phone and website are real numbers already used elsewhere in this
-   file. bookingHref is BLANK until you paste in your Housecall Pro
-   online-booking URL — until then that button renders as a plain,
-   non-clickable label instead of a dead link, so there's no risk of
-   shipping a broken "Book online" button to a real customer.
-   [OWNER: paste your HCP booking link into bookingHref below] */
+   phone, website, and the HCP booking link are all real. */
 const CTA = {
   phone: "(952) 314-2468",
   phoneHref: "tel:+19523142468",
@@ -1303,12 +1303,16 @@ function renderTuneupPrint(s){
       ${renderRecoPrint(1, s.tier1Items)}
       ${renderRecoPrint(2, s.tier2Items)}
 
-      <h4>Age &amp; wear assessment</h4>
-      ${doorRow && s.doorCondition ? `<div class="pr-callout ${s.doorCondition}"><b>Door — ${doorRow.label}</b>${doorRow[s.doorCondition]}</div>` : ""}
-      ${openerRow && s.openerCondition ? `<div class="pr-callout ${s.openerCondition}"><b>Opener — ${openerRow.label}</b>${openerRow[s.openerCondition]}</div>` : ""}
+      <div class="pr-subgroup">
+        <h4>Age &amp; wear assessment</h4>
+        ${doorRow && s.doorCondition ? `<div class="pr-callout ${s.doorCondition}"><b>Door — ${doorRow.label}</b>${doorRow[s.doorCondition]}</div>` : ""}
+        ${openerRow && s.openerCondition ? `<div class="pr-callout ${s.openerCondition}"><b>Opener — ${openerRow.label}</b>${openerRow[s.openerCondition]}</div>` : ""}
+      </div>
 
-      <h4>Recommended maintenance routine</h4>
-      ${renderRoutineSpectrum(routineTier, routineDriver, "pr-callout")}
+      <div class="pr-subgroup">
+        <h4>Recommended maintenance routine</h4>
+        ${renderRoutineSpectrum(routineTier, routineDriver, "pr-callout")}
+      </div>
 
       ${renderCTA()}
     </div>
@@ -1323,10 +1327,14 @@ function renderTuneupPrint(s){
 
     <div class="pr-section">
       <h3>Visual inspection</h3>
-      <h4>Safety-related</h4>
-      <div class="pr-list">${viRows("safety")}</div>
-      <h4>Performance-related</h4>
-      <div class="pr-list">${viRows("performance")}</div>
+      <div class="pr-subgroup">
+        <h4>Safety-related</h4>
+        <div class="pr-list">${viRows("safety")}</div>
+      </div>
+      <div class="pr-subgroup">
+        <h4>Performance-related</h4>
+        <div class="pr-list">${viRows("performance")}</div>
+      </div>
     </div>
 
     <div class="pr-section">

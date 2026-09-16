@@ -332,6 +332,17 @@ main{ max-width:720px; margin:0 auto; padding:16px 16px 96px; }
 }
 .pr-highlight h4{ font-size:12px; color:var(--navy); margin:14px 0 8px; }
 .pr-highlight h4:first-of-type{ margin-top:0; }
+
+.pr-cta{ margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); page-break-inside:avoid; }
+.pr-cta-title{ font-size:12px; font-weight:700; color:var(--navy); margin-bottom:8px; }
+.pr-cta-row{ display:flex; flex-wrap:wrap; gap:8px; }
+.pr-cta-item{
+  display:inline-block; font-size:11.5px; font-weight:600; text-decoration:none;
+  color:var(--navy); background:#fff; border:1px solid var(--line);
+  padding:7px 12px; border-radius:3px;
+}
+.pr-cta-primary{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.pr-cta-disabled{ background:#EDEBE5; color:var(--ink-soft); border-color:var(--line); }
 .pr-intro{ font-size:12.5px; line-height:1.5; color:var(--ink-soft); margin-bottom:14px; }
 </style>
 </head>
@@ -596,6 +607,22 @@ const PRINT_LOGO_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAFZCA
 const SERVICE_DESCRIPTION = {
   basic: "This report documents a Basic Tune-Up: a full visual inspection of the door and opener, lubrication of moving parts, and minor adjustments as needed.",
   comprehensive: "This report documents a Comprehensive Safety & Performance Tune-Up: everything in a Basic Tune-Up, plus spring balance and safety testing, opener force and auto-reverse checks, and emergency release testing.",
+};
+
+/* Call-to-action shown at the end of the Recommendations block —
+   phone and website are real numbers already used elsewhere in this
+   file. bookingHref is BLANK until you paste in your Housecall Pro
+   online-booking URL — until then that button renders as a plain,
+   non-clickable label instead of a dead link, so there's no risk of
+   shipping a broken "Book online" button to a real customer.
+   [OWNER: paste your HCP booking link into bookingHref below] */
+const CTA = {
+  phone: "(952) 314-2468",
+  phoneHref: "tel:+19523142468",
+  website: "northviewdoorsystems.com",
+  websiteHref: "https://northviewdoorsystems.com",
+  bookingHref: "",
+  bookingLabel: "Book online",
 };
 
 // Door: 20-30 yr typical service life
@@ -1162,6 +1189,22 @@ function prBadge(cls, label){
   return `<span class="pr-badge ${cls}">${label}</span>`;
 }
 
+function renderCTA(){
+  const bookingHTML = CTA.bookingHref
+    ? `<a class="pr-cta-item pr-cta-primary" href="${esc(CTA.bookingHref)}">${esc(CTA.bookingLabel)}</a>`
+    : `<span class="pr-cta-item pr-cta-primary pr-cta-disabled">${esc(CTA.bookingLabel)} — add your HCP link</span>`;
+  return `
+    <div class="pr-cta">
+      <div class="pr-cta-title">Questions, or ready for your next visit?</div>
+      <div class="pr-cta-row">
+        ${bookingHTML}
+        <a class="pr-cta-item" href="${esc(CTA.phoneHref)}">Call ${esc(CTA.phone)}</a>
+        <a class="pr-cta-item" href="${esc(CTA.websiteHref)}">${esc(CTA.website)}</a>
+      </div>
+    </div>
+  `;
+}
+
 function renderRecoPrint(tierNum, items){
   const title = tierNum === 1 ? "Safety-critical repairs" : "Performance &amp; longevity repairs";
   const cls = tierNum === 1 ? "tier1" : "tier2";
@@ -1239,7 +1282,7 @@ function renderTuneupPrint(s){
   return `
     <div class="pr-header">
       <img src="${PRINT_LOGO_SRC}" alt="Northview">
-      <div class="meta">Northview Doors &amp; Systems<br>northviewdoorsystems.com &middot; (952) 314-2468</div>
+      <div class="meta">Northview Doors &amp; Systems<br><a href="${esc(CTA.websiteHref)}" style="color:inherit;text-decoration:none;">${esc(CTA.website)}</a> &middot; <a href="${esc(CTA.phoneHref)}" style="color:inherit;text-decoration:none;">${esc(CTA.phone)}</a></div>
     </div>
     <div class="pr-title">Maintenance &amp; Tune-Up Report</div>
     <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">${s.tier === "comprehensive" ? "Comprehensive Safety & Performance Tune-Up" : "Basic Tune-Up"}</div>
@@ -1266,6 +1309,8 @@ function renderTuneupPrint(s){
 
       <h4>Recommended maintenance routine</h4>
       ${renderRoutineSpectrum(routineTier, routineDriver, "pr-callout")}
+
+      ${renderCTA()}
     </div>
 
     <div class="pr-section">
